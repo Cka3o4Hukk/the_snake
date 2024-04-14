@@ -18,7 +18,7 @@ LEFT = (-1, 0)
 RIGHT = (1, 0)
 
 # Цвет фона - черный:
-BOARD_BACKGROUND_COLOR = (0, 0, 0)
+BOARD_BACKGROUND_COLOR = (150, 75, 0)
 
 # Цвет границы ячейки
 BORDER_COLOR = (93, 216, 228)
@@ -50,6 +50,7 @@ class GameObject():
     def __init__(self):
         self.position = (0, 0)
         self.body_color = DEFAULT_COLOR
+        self.length = 1
 
     def draw():
         pass
@@ -60,12 +61,13 @@ class Apple(GameObject):
         self.body_color = APPLE_COLOR
         self.position = self.randomize_position()
 
-    def randomize_position(self):        
+    # Создание координат яблока кортежем 
+    def randomize_position(self):
         return (
             randint(0, GRID_WIDTH) * GRID_SIZE,
             randint(0, GRID_HEIGHT) * GRID_SIZE
         )
-        
+
 
     def draw(self):
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
@@ -120,31 +122,39 @@ class Snake(GameObject):
     def move(self):
         # Первоначальное положение головы
         head = self.positions[0]
+      #  self.length_snake = length_snake
 
         # Новое положение головы
-        new_head = [head[0] + self.direction[0] * GRID_SIZE, head[1] +
-                    + self.direction[1] * GRID_SIZE]     
-
-        
+        length_snake = [(head[0] + self.direction[0] * GRID_SIZE, head[1] +
+                         + self.direction[1] * GRID_SIZE)]
         # Выход за игровое поле налево
-        if new_head[0] < 0:
-            new_head = (SCREEN_WIDTH - GRID_SIZE, new_head[1])
+        if length_snake[0][0] < 0:
+            length_snake[0] = (SCREEN_WIDTH - GRID_SIZE, length_snake[0][1])
 
         # Выход за игровое поле направо
-        elif new_head[0] >= SCREEN_WIDTH:
-            new_head = (0, new_head[1])
+        elif length_snake[0][0] >= SCREEN_WIDTH:
+            length_snake[0] = (0, length_snake[0][1])
 
-        # Выход за игровое поле веерх
-        elif new_head[1] < 0:
-            new_head = (new_head[0], SCREEN_HEIGHT - GRID_SIZE)        
+        # Выход за игровое поле вверх
+        elif length_snake[0][1] < 0:
+            length_snake[0] = (length_snake[0][0], SCREEN_HEIGHT - GRID_SIZE)
+
         # Выход за игровое поле вниз
-        elif new_head[1] >= SCREEN_HEIGHT:
-            new_head = (new_head[0], 0)
-        
+        elif length_snake[0][1] >= SCREEN_HEIGHT:
+            length_snake[0] = (length_snake[0][0], 0)
+
         # Удаление хвоста
-        self.positions.insert(0, new_head)
+        self.positions.insert(0, length_snake[0])
         if len(self.positions) > self.length:
-            self.positions.pop()     
+            self.positions.pop()
+
+ 
+    #        print('asd')
+#            self.positions.insert(0, length_snake[0])
+        #    if self.length > 1:
+        #        self.positions = [length_snake] + self.positions[:]    
+
+            
 
 def handle_keys(game_object):
     for event in pygame.event.get():
@@ -160,6 +170,7 @@ def handle_keys(game_object):
                 game_object.next_direction = LEFT
             elif event.key == pygame.K_RIGHT and game_object.direction != LEFT:
                 game_object.next_direction = RIGHT
+
 
 def main():
     # Тут нужно создать экземпляры классов.
@@ -183,8 +194,12 @@ def main():
                 elif event.key == pygame.K_LEFT:
                     snake.update_direction(LEFT)
                 elif event.key == pygame.K_RIGHT:
-                    snake.update_direction(RIGHT)        
-    #    if snake.positions[0] == apple.position:
+                    snake.update_direction(RIGHT)    
+
+        #if snake.positions[0] == apple.position:
+            #snake.self.positions = snake.length_snake 
+            
+            
     #        snake.length += 1
     #        apple.position = apple.randomize_position()
         snake.move()
