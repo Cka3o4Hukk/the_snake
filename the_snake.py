@@ -1,11 +1,15 @@
-"""Здравствуйте. В коде много недостатков, но основная логика работает.
+"""Здравствуйте. 
+В коде много недостатков, но основная логика работает.
 После отправления на ревью я продолжаю дорабатывать проект.
-Отправил, чтобы быстрее шёл процесс"""
+Отправил, чтобы быстрее шёл процесс.
+README.md также настроил
+Единственное, что может быть не так в логике
+Это сброс позиции змейки при столкновении с собой
+Я возвращаю её в центр, но возможно нужно лишь 'обрезать' её"""
+
 from random import randint
+
 import pygame
-
-# Инициализация PyGame:
-
 
 # Константы для размеров поля и сетки:
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
@@ -51,20 +55,21 @@ clock = pygame.time.Clock()
 """dsfsdfsdf"""
 class GameObject():
     """Создание начальных данных"""
-    def __init__(self):
-        self.position = (0, 0)
-        self.body_color = DEFAULT_COLOR
-        self.length = 1
+    def __init__(self, position=(0, 0), body_color=DEFAULT_COLOR, length=1):
+        self.position = position
+        self.body_color = body_color
+        self.length = length
 
     def draw(self):
-        """Абстрактный метод. Нет pass, чтобы не было предупреждения
-        Unnecessary pass statement"""
+        """Абстрактный метод. 
+        Нет pass, чтобы не было предупреждения Unnecessary pass statement"""
 
 
 class Apple(GameObject):
     """Создание и настройка яблока"""
-    def __init__(self):
-        self.body_color = APPLE_COLOR
+    def __init__(self, position=(0, 0), body_color=APPLE_COLOR, length=1):
+        super().__init__(position, body_color, length)
+        # Создание координат яблока кортежем
         self.position = self.randomize_position()
     # Создание координат яблока кортежем
     def randomize_position(self):
@@ -76,6 +81,7 @@ class Apple(GameObject):
 
 
     def draw(self):
+        """Графическое создание яблока"""
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
@@ -83,7 +89,8 @@ class Apple(GameObject):
 
 class Snake(GameObject):
     """Основные характеристики змейки"""
-    def __init__(self):
+    def __init__(self, position=(0, 0), body_color=SNAKE_COLOR):
+        super().__init__(position, body_color)
         # начальное положение змейки
         self.position = None
         self.positions = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
@@ -204,6 +211,7 @@ def handle_keys(game_object):
 def main():
     """Основной игровой цикл"""
     # pylint: disable=no-member
+    # Инициализация PyGame:
     pygame.init()
     # Тут нужно создать экземпляры классов.
     apple = Apple()
