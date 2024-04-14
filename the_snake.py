@@ -90,9 +90,8 @@ class Snake(GameObject):
             rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
             pygame.draw.rect(screen, self.body_color, rect)
             pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
-            
 
-        # Отрисовка головы змейки
+        #  Отрисовка головы змейки
         head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, head_rect)
         pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
@@ -119,10 +118,12 @@ class Snake(GameObject):
         elif direction == RIGHT and self.direction != LEFT:
             self.direction = RIGHT
 
-    def move(self):
+    def get_head_position(self):
+        return list(self.positions[0])
+
+    def move(self):        
         # Первоначальное положение головы
         head = self.positions[0]
-      #  self.length_snake = length_snake
 
         # Новое положение головы
         length_snake = [(head[0] + self.direction[0] * GRID_SIZE, head[1] +
@@ -146,9 +147,17 @@ class Snake(GameObject):
         # Удаление хвоста
         self.positions.insert(0, length_snake[0])
         if len(self.positions) > self.length:
-            self.positions.pop()
+             self.positions.pop()
 
- 
+        self.length_snake = length_snake
+        print(head)
+        print(length_snake)
+
+    def check_collision(self, apple):
+        if self.positions[0] == apple.position:
+            return True
+        return False
+
     #        print('asd')
 #            self.positions.insert(0, length_snake[0])
         #    if self.length > 1:
@@ -196,12 +205,11 @@ def main():
                 elif event.key == pygame.K_RIGHT:
                     snake.update_direction(RIGHT)    
 
-        #if snake.positions[0] == apple.position:
-            #snake.self.positions = snake.length_snake 
+        if snake.check_collision(apple):
+            apple = Apple()
             
-            
-    #        snake.length += 1
-    #        apple.position = apple.randomize_position()
+            print(snake.length_snake)
+
         snake.move()
         screen.fill(BOARD_BACKGROUND_COLOR)
         apple.draw()

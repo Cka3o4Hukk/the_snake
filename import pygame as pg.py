@@ -1,65 +1,78 @@
-import pygame as pg
+import pygame
 from random import randrange
-# Константы
-WINDOW = 1000
-FPS = 60
-TILE_SIZE = 50
-RANGE = (TILE_SIZE // 2, WINDOW - TILE_SIZE // 2, TILE_SIZE)
-# Функция для определения координат (X:Y) случайной позиции на игровом поле
-get_random_position = lambda: [randrange(*RANGE), randrange(*RANGE)]
-# Параметры змейки
-snake = pg.rect.Rect([0, 0, TILE_SIZE - 2, TILE_SIZE - 2])
-snake.center = get_random_position()
+
+RES = 800
+SIZE = 50
+
+x, y = randrange(SIZE, RES - SIZE, SIZE), randrange(SIZE, RES - SIZE, SIZE)
+apple = randrange(SIZE, RES - SIZE, SIZE), randrange(SIZE, RES - SIZE, SIZE)
 length = 1
-segments = [snake.copy()]
-snake_dir = (0, 0)
-# Параметры времени и задержки
-time = 0
-time_step = 110
-# Параметры объектов еды
-food = snake.copy()
-food.center = get_random_position()
-# Инициализация объектов
-gameScreen = pg.display.set_mode([WINDOW] * 2)
-clock = pg.time.Clock()
-# Главный цикл игры
-while True:
-  # Частота обновления экрана
-    clock.tick(FPS)
-    # Цикл обработки событий
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
+snake = [(x, y)]
+dx, dy = 0, 0
+fps = 60
+dirs = {'W': True, 'S': True, 'A': True, 'D': True, }
+score = 0
+speed_count, snake_speed = 0, 10
+
+pygame.init()
+surface = pygame.display.set_mode([RES, RES])
+clock = pygame.time.Clock()
+font_score = pygame.font.SysFont('Arial', 26, bold=True)
+font_end = pygame.font.SysFont('Arial', 66, bold=True)
+
+def close_game():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
             exit()
-        # Обработка нажатий WASD
-        if event.type == pg.KEYDOWN:
-            if event.key == pg.K_w:
-                snake_dir = (0, -TILE_SIZE)
-            if event.key == pg.K_s:
-                snake_dir = (0, TILE_SIZE)
-            if event.key == pg.K_a:
-                snake_dir = (-TILE_SIZE, 0)
-            if event.key == pg.K_d:
-                snake_dir = (TILE_SIZE, 0)
-        gameScreen.fill((155, 188, 15))
-        # Столкновение с границами и телом змейки
-        snake_collision = pg.Rect.collidelist(snake, segments[:-1]) != -1
-        if snake.left < 0 or snake.right > WINDOW or snake.top < 0 or snake.bottom > WINDOW or snake_collision:
-            snake.center, food.center = get_random_position(), get_random_position()
-            length, snake_dir = 1, (0, 0)
-            segments = [snake.copy()]
-        # Поедание
-        if snake.center == food.center:
-            food.center = get_random_position()
-            length += 1
-        # Рисуем объект еды
-        pg.draw.rect(gameScreen, (15, 56, 15), food)
-        # Рисуем змейку
-        [pg.draw.rect(gameScreen, (120, 149, 12), segment) for segment in segments]
-        # Управляем змейкой
-        time_now = pg.time.get_ticks()
-        if time_now - time > time_step:
-            time = time_now
-            snake.move_ip(snake_dir)
-            segments.append(snake.copy())
-            segments = segments[-length:]
-        pg.display.flip()
+
+while True:
+    surface.blit(img, (0, 0))
+    # drawing snake, apple
+    [pygame.draw.rect(surface, pygame.Color('green'), (i, j, SIZE - 1, SIZE - 1)) for i, j in snake]
+    pygame.draw.rect(surface, pygame.Color('red'), (*apple, SIZE, SIZE))
+    # show score
+    render_score = font_score.render(f'SCORE: {score}', 1, pygame.Color('orange'))
+    surface.blit(render_score, (5, 5))
+    # snake movement
+    speed_count += 1
+    if not speed_count % snake_speed:
+	    x += dx * SIZE
+	    y += dy * SIZE
+	    snake.append((x, y))
+	    snake = snake[-length:]
+    # eating food
+    if snake[-1] == apple:
+        apple = randrange(SIZE, RES - SIZE, SIZE), randrange(SIZE, RES - SIZE, SIZE)
+        length += 1
+        score += 1
+        snake_speed -= 1
+        snake_speed = max(snake_speed, 4)
+    # game over
+    if x < 0 or x > RES - SIZE or y < 0 or y > RES - SIZE or len(snake) != len(set(snake)):
+        while True:
+            render_end = font_end.render('GAME OVER', 1, pygame.Color('orange'))
+            surface.blit(render_end, (RES // 2 - 200, RES // 3))
+            pygame.display.flip()
+            close_game()
+
+    pygame.display.flip()
+    clock.tick(fps)
+    close_game()
+    # controls
+    key = pygame.key.get_pressed()
+    if key[pygame.K_w]:
+        if dirs['W']:
+            dx, dy = 0, -1
+            dirs = {'W': True, 'S': False, 'A': True, 'D': True, }
+    elif key[pygame.K_s]:
+        if dirs['S']:
+            dx, dy = 0, 1
+            dirs = {'W': False, 'S': True, 'A': True, 'D': True, }
+    elif key[pygame.K_a]:
+        if dirs['A']:
+            dx, dy = -1, 0
+            dirs = {'W': True, 'S': True, 'A': True, 'D': False, }
+    elif key[pygame.K_d]:
+        if dirs['D']:
+            dx, dy = 1, 0
+            dirs = {'W': True, 'S': True, 'A': False, 'D': True, }
