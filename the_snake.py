@@ -56,7 +56,7 @@ class GameObject():
         self.length = length
 
     def draw(self):
-        """Абстрактный метод. Unnecessary pass statement - если есть pass."""
+        """Абстрактный метод. Unnecessary pass statement - есть pass."""
 
 
 class Apple(GameObject):
