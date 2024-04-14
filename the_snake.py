@@ -1,11 +1,14 @@
-"""Здравствуйте. 
+"""Здравствуйте.
+
 В коде много недостатков, но основная логика работает.
 После отправления на ревью я продолжаю дорабатывать проект.
 Отправил, чтобы быстрее шёл процесс.
 README.md также настроил
 Единственное, что может быть не так в логике
 Это сброс позиции змейки при столкновении с собой
-Я возвращаю её в центр, но возможно нужно лишь 'обрезать' её"""
+Я возвращаю её в центр, но возможно нужно лишь 'обрезать' её
+Строчки 110, 185 тоже скорее всего неверные
+"""
 
 from random import randint
 
@@ -52,44 +55,50 @@ clock = pygame.time.Clock()
 
 
 # Тут опишите все классы игры.
-"""dsfsdfsdf"""
+
+
 class GameObject():
-    """Создание начальных данных"""
+    """Создание родительского класса."""
+
     def __init__(self, position=(0, 0), body_color=DEFAULT_COLOR, length=1):
+        """Создание начальных данных."""
         self.position = position
         self.body_color = body_color
         self.length = length
 
     def draw(self):
-        """Абстрактный метод. 
-        Нет pass, чтобы не было предупреждения Unnecessary pass statement"""
+        """Абстрактный метод. Unnecessary pass statement - если есть pass."""
 
 
 class Apple(GameObject):
-    """Создание и настройка яблока"""
+    """Создание и настройка яблока."""
+
     def __init__(self, position=(0, 0), body_color=APPLE_COLOR, length=1):
+        """Место на поле, цвет, количество яблок."""
         super().__init__(position, body_color, length)
         # Создание координат яблока кортежем
         self.position = self.randomize_position()
     # Создание координат яблока кортежем
+
     def randomize_position(self):
-        """Создание позиции яблока в центре"""
+        """Создание позиции яблока в центре."""
         return (
             randint(0, GRID_WIDTH) * GRID_SIZE,
             randint(0, GRID_HEIGHT) * GRID_SIZE
         )
 
-
     def draw(self):
-        """Графическое создание яблока"""
+        """Графическое создание яблока."""
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
 
 class Snake(GameObject):
-    """Основные характеристики змейки"""
+    """Создание змейки."""
+
     def __init__(self, position=(0, 0), body_color=SNAKE_COLOR):
+        """Основные характеристики змейки."""
         super().__init__(position, body_color)
         # начальное положение змейки
         self.position = None
@@ -99,10 +108,10 @@ class Snake(GameObject):
         self.body_color = SNAKE_COLOR  # цвет змейки
         self.last = None  # последний сегмент змейки
         self.direction = RIGHT  # заданное первоначальное движение
-
+        self.length_snake = []
 
     def draw(self):
-        """Создание змейки"""
+        """Графическое создание змейки."""
         for position in self.positions[:-1]:
             rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
             pygame.draw.rect(screen, self.body_color, rect)
@@ -119,7 +128,7 @@ class Snake(GameObject):
             pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
     def update_direction(self, direction):
-        """Обновление направление движения змейки """
+        """Обновление направление движения змейки."""
         # Движение вниз
         if direction == UP and self.direction != DOWN:
             self.direction = UP
@@ -137,11 +146,11 @@ class Snake(GameObject):
             self.direction = RIGHT
 
     def get_head_position(self):
-        """Возвращает позицию головы змейки"""
+        """Возвращает позицию головы змейки."""
         return list(self.positions[0])
 
     def move(self):
-        "Движение змейки"  
+        """Движение змейки."""
         # Первоначальное положение головы
         head = self.positions[0]
 
@@ -176,24 +185,24 @@ class Snake(GameObject):
 
         self.length_snake = length_snake
 
-
     def check_collision(self, apple):
-        """Увеличение змейки, если она съела яблоко (координаты совпали) """
+        """Увеличение змейки, если она съела яблоко (координаты совпали)."""
         if self.positions[0] == apple.position:
             self.length += 1
             apple.position = apple.randomize_position()
             return True
         return False
     # Сброс при столкновении с собой
+
     def reset(self):
-        """Если элемент поля есть в теле змейки, тогда сброс в изначальное состояние """
+        """Если элемент поля есть в теле змейки - сброс."""
         if self.length_snake[0] in self.positions[1:]:
             self.positions = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
             self.length = 1
 
 
 def handle_keys(game_object):
-    """Обрабатывает нажатия клавиш, чтобы изменить направление движения змейки"""
+    """Обрабатывает нажатия клавиш, чтобы изменить направление змейки."""
     # pylint: disable=no-member - добавил, так как возникают предупрежения
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -208,8 +217,10 @@ def handle_keys(game_object):
                 game_object.next_direction = LEFT
             elif event.key == pygame.K_RIGHT and game_object.direction != LEFT:
                 game_object.next_direction = RIGHT
+
+
 def main():
-    """Основной игровой цикл"""
+    """Основной игровой цикл."""
     # pylint: disable=no-member
     # Инициализация PyGame:
     pygame.init()
@@ -237,7 +248,7 @@ def main():
 
         if snake.check_collision(apple):
             snake.length += 1
-            apple = Apple() # создание нового яблока
+            apple = Apple()  # создание нового яблока
         snake.reset()
         snake.move()
         screen.fill(BOARD_BACKGROUND_COLOR)
@@ -246,7 +257,10 @@ def main():
         pygame.display.update()
         clock.tick(SPEED)
     pygame.quit()
+
+
 if __name__ == '__main__':
+
     main()
 
 
