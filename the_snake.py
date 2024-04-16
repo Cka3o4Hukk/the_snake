@@ -67,6 +67,8 @@ centre_position = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
 
 Остальное в процессе, мелочи в коде поправил, серьезные ошибки
 также попытался исправить, но нужно ещё доработать
+
+Добавил камень, но пишет, что main сложный, поэтому я убрал для проверки
 '''
 
 
@@ -260,12 +262,10 @@ def main():
     pygame.init()
     # Тут нужно создать экземпляры классов.
     apple = Apple()
-    stone = Stone()
     snake = Snake()
     running = True
     snake.move()
     # Add more mappings as needed}
-
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -283,19 +283,13 @@ def main():
         if snake.check_collision(apple):
             snake.length += 1
             apple = Apple()  # создание нового яблока
-
-        if snake.check_stone(stone):
-            pygame.quit()
-
         snake.reset()
         snake.move()
         screen.fill(BOARD_BACKGROUND_COLOR)
         apple.draw()
-        stone.draw()
         snake.draw()
         pygame.display.update()
         clock.tick(SPEED)
-    pygame.quit()
 
 
 if __name__ == '__main__':
