@@ -231,26 +231,26 @@ class Snake(GameObject):
         if self.length_snake[0] in self.positions[1:]:
             # При =central_positions.. там уже другое значение от начального
             self.positions = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
-            print(centre_position)
             self.length = 1
 
 
 def handle_keys(game_object):
     """Обрабатывает нажатия клавиш, чтобы изменить направление змейки."""
+    # pylint: disable=no-member
+    movement = {
+        (LEFT, pygame.K_UP): UP,
+        (RIGHT, pygame.K_UP): UP,
+        (UP, pygame.K_LEFT): LEFT,
+    }
     # pylint: disable=no-member - добавил, так как возникают предупрежения
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP and game_object.direction != DOWN:
-                game_object.next_direction = UP
-            elif event.key == pygame.K_DOWN and game_object.direction != UP:
-                game_object.next_direction = DOWN
-            elif event.key == pygame.K_LEFT and game_object.direction != RIGHT:
-                game_object.next_direction = LEFT
-            elif event.key == pygame.K_RIGHT and game_object.direction != LEFT:
-                game_object.next_direction = RIGHT
+            new_direction = movement.get((game_object.direction, event.key))
+            if new_direction and new_direction != game_object.direction:
+                game_object.next_direction = new_direction
 
 
 def main():
@@ -264,6 +264,7 @@ def main():
     snake = Snake()
     running = True
     snake.move()
+    # Add more mappings as needed}
 
     while running:
         for event in pygame.event.get():
