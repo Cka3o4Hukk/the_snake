@@ -4,6 +4,7 @@ from random import randint
 
 import pygame
 
+
 # Константы для размеров поля и сетки:
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
@@ -25,6 +26,9 @@ BORDER_COLOR = (93, 216, 228)
 # Цвет яблока
 APPLE_COLOR = (255, 0, 0)
 
+# Цвет камня
+STONE_COLOR = (128, 128, 128)
+
 # Цвет змейки
 SNAKE_COLOR = (0, 255, 0)
 
@@ -43,7 +47,27 @@ pygame.display.set_caption('Змейка')
 # Настройка времени:
 clock = pygame.time.Clock()
 
+# Позиция в центре
+centre_position = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
+
 # Тут опишите все классы игры.
+
+'''Уточнить некоторые моменты
+Для удобства рекомендую добавить метод создания новой ячейки
+Я сделал это в отдельных методах, создание поля через random
+и создание графического изображения (draw_default)
+
+Не хватает атрибута метода, отражающего занятые ячейки.
+Могу передать данные яблока и камня, и уже от них заполнить
+занятые ячейки. Так нужно или иначе?
+
+Перебор недопустим. Стоит воспользоваться оператором %.
+Пока не придумал с чем использовать остаток, в любой точке
+за картой координата -20, но на что делить пока не знаю
+
+Остальное в процессе, мелочи в коде поправил, серьезные ошибки
+также попытался исправить, но нужно ещё доработать
+'''
 
 
 class GameObject():
@@ -55,8 +79,35 @@ class GameObject():
         self.body_color = body_color
         self.length = length
 
+    def randomize_position(self):
+        """Создание позиции предмета рандомно."""
+        return (
+            randint(0, GRID_WIDTH) * GRID_SIZE,
+            randint(0, GRID_HEIGHT) * GRID_SIZE
+        )
+
+    def draw_default(self):
+        """Графическое создание предмета."""
+        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        pygame.draw.rect(screen, self.body_color, rect)
+        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
     def draw(self):
         """Абстрактный метод. Unnecessary pass statement - есть pass."""
+
+
+class Stone(GameObject):
+    """Создание и настройка камня."""
+
+    def __init__(self, position=(0, 0), body_color=STONE_COLOR, length=1):
+        """Место на поле, цвет, количество камней."""
+        super().__init__(position, body_color, length)
+        # Создание координат яблока кортежем
+        self.position = self.randomize_position()
+
+    def draw(self):
+        """Графическое создание камня."""
+        self.draw_default()
 
 
 class Apple(GameObject):
@@ -69,18 +120,9 @@ class Apple(GameObject):
         self.position = self.randomize_position()
     # Создание координат яблока кортежем
 
-    def randomize_position(self):
-        """Создание позиции яблока в центре."""
-        return (
-            randint(0, GRID_WIDTH) * GRID_SIZE,
-            randint(0, GRID_HEIGHT) * GRID_SIZE
-        )
-
     def draw(self):
         """Графическое создание яблока."""
-        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, rect)
-        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+        self.draw_default()
 
 
 class Snake(GameObject):
@@ -91,9 +133,9 @@ class Snake(GameObject):
         super().__init__(position, body_color)
         # начальное положение змейки
         self.position = None
-        self.positions = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
+        self.pos = None
+        self.positions = centre_position
         self.length = 1  # длины змейки
-        self.next_direction = None
         self.body_color = SNAKE_COLOR  # цвет змейки
         self.last = None  # последний сегмент змейки
         self.direction = RIGHT  # заданное первоначальное движение
@@ -107,7 +149,7 @@ class Snake(GameObject):
             pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
         #  Отрисовка головы змейки
-        head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
+        head_rect = Snake.get_head_position(self), (GRID_SIZE, GRID_SIZE)
         pygame.draw.rect(screen, self.body_color, head_rect)
         pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
 
@@ -121,15 +163,12 @@ class Snake(GameObject):
         # Движение вниз
         if direction == UP and self.direction != DOWN:
             self.direction = UP
-
         # Движение вверх
         elif direction == DOWN and self.direction != UP:
             self.direction = DOWN
-
         # Движение налево
         elif direction == LEFT and self.direction != RIGHT:
             self.direction = LEFT
-
         # Движение направо
         elif direction == RIGHT and self.direction != LEFT:
             self.direction = RIGHT
@@ -150,19 +189,15 @@ class Snake(GameObject):
         # Выход за игровое поле налево
         if length_snake[0][0] < 0:
             length_snake[0] = (SCREEN_WIDTH - GRID_SIZE, length_snake[0][1])
-
         # Выход за игровое поле направо
         elif length_snake[0][0] >= SCREEN_WIDTH:
             length_snake[0] = (0, length_snake[0][1])
-
         # Выход за игровое поле вверх
         elif length_snake[0][1] < 0:
             length_snake[0] = (length_snake[0][0], SCREEN_HEIGHT - GRID_SIZE)
-
         # Выход за игровое поле вниз
         elif length_snake[0][1] >= SCREEN_HEIGHT:
             length_snake[0] = (length_snake[0][0], 0)
-
         # Если было столкновение с яблоком, добавляем новую голову
         if len(self.positions) < self.length:
             self.positions.insert(0, length_snake[0])
@@ -181,12 +216,22 @@ class Snake(GameObject):
             apple.position = apple.randomize_position()
             return True
         return False
+
+    def check_stone(self, stone):
+        """Уменьшение змейки, если она врезалась в камень."""
+        if self.positions[0] == stone.position:
+            self.length -= 1
+            stone.position = stone.randomize_position()
+            return True
+        return False
     # Сброс при столкновении с собой
 
     def reset(self):
         """Если элемент поля есть в теле змейки - сброс."""
         if self.length_snake[0] in self.positions[1:]:
+            # При =central_positions.. там уже другое значение от начального
             self.positions = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
+            print(centre_position)
             self.length = 1
 
 
@@ -215,9 +260,8 @@ def main():
     pygame.init()
     # Тут нужно создать экземпляры классов.
     apple = Apple()
-    apple.draw()
+    stone = Stone()
     snake = Snake()
-    snake.draw()
     running = True
     snake.move()
 
@@ -238,10 +282,15 @@ def main():
         if snake.check_collision(apple):
             snake.length += 1
             apple = Apple()  # создание нового яблока
+
+        if snake.check_stone(stone):
+            pygame.quit()
+
         snake.reset()
         snake.move()
         screen.fill(BOARD_BACKGROUND_COLOR)
         apple.draw()
+        stone.draw()
         snake.draw()
         pygame.display.update()
         clock.tick(SPEED)
