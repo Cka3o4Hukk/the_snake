@@ -65,6 +65,7 @@ directions = {UP: DOWN,
               RIGHT: LEFT}
 
 # Тут опишите все классы игры.
+"Всё что смог, исправил, остальное не понял, написал вам в 'Пачке'."
 
 
 class GameObject():
@@ -124,6 +125,7 @@ class Apple(GameObject):
 
 class Snake(GameObject):
     """Создание змейки."""
+
     def __init__(self, position=(0, 0), body_color=SNAKE_COLOR):
         """Основные характеристики змейки."""
         super().__init__(position, body_color)
