@@ -51,6 +51,7 @@ clock = pygame.time.Clock()
 # Позиция в центре
 centre_position = [((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))]
 
+# pylint: disable=no-member
 move_dict = {
     pygame.K_UP: UP,
     pygame.K_DOWN: DOWN,
@@ -81,7 +82,6 @@ class GameObject():
             randint(0, GRID_WIDTH) * GRID_SIZE,
             randint(0, GRID_HEIGHT) * GRID_SIZE
         )
-
 
     def draw_default(self):
         """Графическое создание предмета."""
@@ -217,7 +217,6 @@ class Snake(GameObject):
             # При =central_positions.. там уже другое значение от начального
             self.positions = [const_position]
             self.length = 1
-            
 
 
 def handle_keys(game_object):
@@ -244,7 +243,7 @@ def main():
     # Add more mappings as needed}
     while running:
         clock.tick(SPEED)
-        handle_keys(snake)  
+        handle_keys(snake)
 
         if snake.check_collision(apple):
             snake.length += 1
@@ -257,7 +256,7 @@ def main():
         screen.fill(BOARD_BACKGROUND_COLOR)
         apple.draw()
         snake.draw()
-        pygame.display.update()        
+        pygame.display.update()
 
 
 if __name__ == '__main__':
