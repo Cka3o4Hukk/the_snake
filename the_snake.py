@@ -174,6 +174,10 @@ class Snake(GameObject):
         if self.get_head_position() == stone.position:
             pygame.quit()
 
+    def reset(self):
+        """Если элемент поля есть в теле змейки - сброс."""
+        self.positions = centre_position
+
 
 def handle_keys(game_object):
     """Обрабатывает нажатия клавиш, чтобы изменить направление змейки."""
