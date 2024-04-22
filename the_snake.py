@@ -64,9 +64,6 @@ directions = {UP: DOWN,
               LEFT: RIGHT,
               RIGHT: LEFT}
 
-# Тут опишите все классы игры.
-"Всё что смог, исправил, остальное не понял, написал вам в 'Пачке'."
-
 
 class GameObject():
     """Создание родительского класса."""
@@ -116,7 +113,6 @@ class Apple(GameObject):
         super().__init__(body_color)
         # Создание координат яблока кортежем
         self.randomize_position()
-    # Создание координат яблока кортежем
 
     def draw(self):
         """Графическое создание яблока."""
@@ -159,7 +155,7 @@ class Snake(GameObject):
         """Возвращает позицию головы змейки."""
         return self.positions[0]
 
-    def move(self):
+    def move(self, apple, stone):
         """Движение змейки."""
         # Новое положение головы
         head_x, head_y = self.get_head_position()  # 1 и 2 координата  головы
@@ -168,21 +164,15 @@ class Snake(GameObject):
             (head_y + self.direction[1] * GRID_SIZE) % SCREEN_HEIGHT)
         self.positions.insert(0, length_snake)
 
-        if self.eated:
-            self.eated = False
-        else:
-            self.last = self.positions.pop()
-
-    def check_collision(self, apple):
-        """Увеличение змейки, если она съела яблоко (координаты совпали)."""
         if self.get_head_position() == apple.position:
             while apple.position in self.positions:
                 apple.position = apple.randomize_position()
             self.eated = True
+        else:
+            self.last = self.positions.pop()
 
-    def reset(self):
-        """Если элемент поля есть в теле змейки - сброс."""
-        self.positions = centre_position
+        if self.get_head_position() == stone.position:
+            pygame.quit()
 
 
 def handle_keys(game_object):
@@ -203,21 +193,20 @@ def main():
     # Тут нужно создать экземпляры классов.
     apple = Apple()
     snake = Snake()
+    stone = Stone()
     running = True
     snake.draw()
     while running:
         clock.tick(SPEED)
         handle_keys(snake)
 
-        if snake.check_collision(apple):
-            apple = Apple()
-
         if snake.positions[0] in snake.positions[1:]:
             snake.reset()
 
         apple.draw()
         snake.draw()
-        snake.move()
+        stone.draw()
+        snake.move(apple, stone)
         if snake.positions[0] in snake.positions[1:]:
             snake.reset()
         pygame.display.update()
